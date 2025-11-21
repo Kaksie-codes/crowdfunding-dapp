@@ -33,7 +33,7 @@ export default function RootLayout({
           <Sidebar/>
           <section className="flex-1">
             <Header />
-            <div className="p-4">
+            <div className="p-4 ml-[250px]">
               {children}
             </div>
           </section>

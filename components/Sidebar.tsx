@@ -13,7 +13,7 @@ const Sidebar = () => {
   ];
 
   return (
-    <aside className="min-w-[250px] h-screen bg-card border-r border-border p-4 flex flex-col gap-8">
+    <aside className="min-w-[250px] fixed top-0 left-0 bottom-0 h-screen bg-card border-r border-border p-4 flex flex-col gap-8">
       <Logo />
 
       <nav className="flex flex-col gap-2">
