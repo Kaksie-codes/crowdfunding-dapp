@@ -14,7 +14,7 @@ import { useState, useMemo, useEffect } from "react";
 const TransactionsPage = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [search, setSearch] = useState("");
-  const copyHook = useCopy();
+  const {copiedValue, copyToClipboard} = useCopy();
 
   // filtering
   const filtered = useMemo(() => {
@@ -26,8 +26,7 @@ const TransactionsPage = () => {
   }, [search]);
 
   // pagination
-  const { currentPage, setCurrentPage, totalPages, paginated } =
-    usePagination(filtered, 24);
+  const { currentPage, setCurrentPage, totalPages, paginated } =  usePagination(filtered, 21);
 
   // Reset pagination when search changes
   useEffect(() => {
@@ -51,13 +50,16 @@ const TransactionsPage = () => {
             Download CSV
           </button>
 
-          <TransactionList data={paginated as { hash: string; wallet: string; timestamp: number; amount: string; }[]} copyHook={{
-            copy: copyHook.copyToClipboard,
-            copied: copyHook.copiedValue
-          }} />
+          <TransactionList 
+            data={paginated as { hash: string; wallet: string; timestamp: number; amount: string; }[]} 
+            copyHook={{
+              copy: copyToClipboard,
+              copied: copiedValue
+            }} 
+          />
           <Pagination
             currentPage={currentPage}
-            totalPages={totalPages}
+            totalPages={600}
             setPage={setCurrentPage}
           />
         </>
