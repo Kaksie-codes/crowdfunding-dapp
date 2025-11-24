@@ -1,28 +1,53 @@
 // lib/viem.ts
-import { createPublicClient, http, createWalletClient, custom, type Transport, fallback } from 'viem';
-import { sepolia } from 'viem/chains';
+import {
+  createPublicClient,
+  http,
+  createWalletClient,
+  custom,
+  type Transport,
+} from "viem";
+import { sepolia } from "viem/chains";
 
-// Public RPC (Sepolia). You can replace with your own RPC (Infura/Alchemy) if desired.
-const SEPOLIA_RPC = 'https://rpc.sepolia.org'; // public RPC endpoint
+// ⭐ EIP-1193 Provider Type (strict, no any)
+export interface EIP1193Provider {
+  request: <T = unknown>(args: {
+    method: string;
+    params?: readonly unknown[] | undefined;
+  }) => Promise<T>;
 
+  on?: (event: string, listener: (...args: unknown[]) => void) => void;
+  removeListener?: (
+    event: string,
+    listener: (...args: unknown[]) => void
+  ) => void;
+}
+
+// ⭐ Extend window typing so TS knows ethereum exists
+declare global {
+  interface Window {
+    ethereum?: EIP1193Provider;
+  }
+}
+
+// Public RPC client (read-only)
 export const publicClient = createPublicClient({
   chain: sepolia,
-  transport: http(SEPOLIA_RPC),
+  transport: http("https://rpc.sepolia.org"),
 });
 
-/**
- * createWalletClientForWindowEthereum
- * Creates a wallet client for the injected provider (MetaMask).
- * Call this after the user grants access (i.e., when window.ethereum is available).
- */
+// Wallet Client for MetaMask
 export const createWalletClientForWindowEthereum = () => {
-  if (typeof window === 'undefined') throw new Error('createWalletClientForWindowEthereum must run in the browser');
+  if (typeof window === "undefined") {
+    throw new Error("Must be run in the browser");
+  }
 
-  // @ts-ignore window.ethereum typed as any
-  const provider = (window as any).ethereum;
-  if (!provider) throw new Error('No injected provider found (MetaMask)');
+  if (!window.ethereum) {
+    throw new Error("Injected provider not found (MetaMask missing)");
+  }
 
-  // 'custom' wraps the injected provider as a viem transport
+  // provider is now perfectly typed
+  const provider: EIP1193Provider = window.ethereum;
+
   const transport: Transport = custom(provider);
 
   return createWalletClient({

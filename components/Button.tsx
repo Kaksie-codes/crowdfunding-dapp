@@ -13,6 +13,7 @@ interface ButtonProps {
   isRounded?: boolean;
   onClick?: MouseEventHandler<HTMLButtonElement>;
   isFullWidth?: boolean;
+  disabled?: boolean;
 }
 
 const sizeClasses: Record<ButtonSize, string> = {
