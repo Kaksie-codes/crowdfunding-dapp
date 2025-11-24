@@ -5,83 +5,137 @@ import Button from './Button';
 import ConnectionStatus from './ConnectionStatus';
 import { useWallet } from '@/context/WalletProvider';
 import { useContract } from '@/hooks/useContract';
+import toast from 'react-hot-toast';
+import { switchToSepolia } from '@/lib/viem';
 
 const ControlInterface = () => {
-  const { address, isConnected } = useWallet();
+  const { address, isConnected, chainId } = useWallet();
   const { fund, withdraw, refresh, isOwner, minDepositETH } = useContract();
   
   const [ethAmount, setEthAmount] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
 
   const handleFund = async () => {
-    setError('');
-    setSuccess('');
-    
     if (!isConnected) {
-      setError('Please connect your wallet first');
+      toast.error('Please connect your wallet first');
       return;
     }
 
+    // Check if on Sepolia network (chain ID 11155111)
+    if (chainId !== 11155111) {
+      try {
+        await toast.promise(
+          switchToSepolia(),
+          {
+            loading: 'Switching to Sepolia network...',
+            success: 'Network switched to Sepolia!',
+            error: 'Failed to switch network. Please switch manually.',
+          }
+        );
+        // Wait a bit for the network switch to complete
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      } catch {
+        toast.error('Please switch to Sepolia network in MetaMask');
+        return;
+      }
+    }
+
     if (!ethAmount || parseFloat(ethAmount) <= 0) {
-      setError('Please enter a valid amount');
+      toast.error('Please enter a valid amount');
       return;
     }
 
     // Check minimum deposit
     if (parseFloat(ethAmount) < parseFloat(minDepositETH)) {
-      setError(`Minimum deposit is ${minDepositETH} ETH ($5 USD equivalent)`);
+      toast.error(`Minimum deposit is ${minDepositETH} ETH ($5 USD equivalent)`);
       return;
     }
 
     try {
       setLoading(true);
-      const txHash = await fund(ethAmount);
-      setSuccess(`Transaction successful! Hash: ${txHash.slice(0, 10)}...`);
+      const txHash = await toast.promise(
+        fund(ethAmount),
+        {
+          loading: 'Processing transaction...',
+          success: 'Transaction successful!',
+          error: 'Transaction failed',
+        }
+      );
+      toast.success(`Hash: ${txHash.slice(0, 10)}...${txHash.slice(-8)}`, {
+        duration: 6000,
+      });
       setEthAmount('');
-    } catch (err: any) {
-      setError(err.message || 'Transaction failed');
+    } catch (err) {
+      const error = err as Error;
+      toast.error(error.message || 'Transaction failed');
     } finally {
       setLoading(false);
     }
   };
 
   const handleWithdraw = async () => {
-    setError('');
-    setSuccess('');
-    
     if (!isConnected) {
-      setError('Please connect your wallet first');
+      toast.error('Please connect your wallet first');
       return;
     }
 
     if (!isOwner) {
-      setError('Only the contract owner can withdraw funds');
+      toast.error('Only the contract owner can withdraw funds');
       return;
+    }
+
+    // Check if on Sepolia network
+    if (chainId !== 11155111) {
+      try {
+        await toast.promise(
+          switchToSepolia(),
+          {
+            loading: 'Switching to Sepolia network...',
+            success: 'Network switched to Sepolia!',
+            error: 'Failed to switch network. Please switch manually.',
+          }
+        );
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      } catch {
+        toast.error('Please switch to Sepolia network in MetaMask');
+        return;
+      }
     }
 
     try {
       setLoading(true);
-      const txHash = await withdraw();
-      setSuccess(`Withdrawal successful! Hash: ${txHash.slice(0, 10)}...`);
-    } catch (err: any) {
-      setError(err.message || 'Withdrawal failed');
+      const txHash = await toast.promise(
+        withdraw(),
+        {
+          loading: 'Processing withdrawal...',
+          success: 'Withdrawal successful!',
+          error: 'Withdrawal failed',
+        }
+      );
+      toast.success(`Hash: ${txHash.slice(0, 10)}...${txHash.slice(-8)}`, {
+        duration: 6000,
+      });
+    } catch (err) {
+      const error = err as Error;
+      toast.error(error.message || 'Withdrawal failed');
     } finally {
       setLoading(false);
     }
   };
 
   const handleRefresh = async () => {
-    setError('');
-    setSuccess('');
     setLoading(true);
     try {
-      await refresh();
-      setSuccess('Contract data refreshed!');
-      setTimeout(() => setSuccess(''), 3000);
-    } catch (err: any) {
-      setError('Failed to refresh data');
+      await toast.promise(
+        refresh(),
+        {
+          loading: 'Refreshing contract data...',
+          success: 'Data refreshed successfully!',
+          error: 'Failed to refresh data',
+        }
+      );
+    } catch {
+      toast.error('Failed to refresh data');
     } finally {
       setLoading(false);
     }
@@ -89,6 +143,12 @@ const ControlInterface = () => {
 
   return (
     <div className='border border-border flex flex-col gap-6 rounded-md bg-card p-4'>
+      {isConnected && chainId !== 11155111 && (
+        <div className='bg-yellow-500/20 border border-yellow-500 rounded-md p-3 text-yellow-200 text-sm'>
+          ⚠️ Wrong network! Please switch to Sepolia. The app will attempt to switch automatically when you transact.
+        </div>
+      )}
+      
       <div className='flex flex-col'>
         <label htmlFor="ethAmount" className='text-lg font-bold text-gray'>
           ETH Amount {minDepositETH && `(Min: ${minDepositETH} ETH)`}
@@ -105,18 +165,6 @@ const ControlInterface = () => {
           min="0"
         />
       </div>
-
-      {error && (
-        <div className='bg-red-500/20 border border-red-500 rounded-md p-3 text-red-200 text-sm'>
-          {error}
-        </div>
-      )}
-
-      {success && (
-        <div className='bg-green-500/20 border border-green-500 rounded-md p-3 text-green-200 text-sm'>
-          {success}
-        </div>
-      )}
 
       <Button
         text={loading ? 'Processing...' : 'Fund Contract'}

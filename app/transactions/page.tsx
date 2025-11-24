@@ -7,7 +7,8 @@ import Tabs from "@/components/tabs";
 import TransactionList from "@/components/transaction-list";
 import { useCopy } from "@/hooks/useCopy";
 import { usePagination } from "@/hooks/usePagination";
-import { contributors, transactions } from "@/lib/mockData";
+import { useContractFunders } from "@/hooks/useContractFunders";
+import { transactions } from "@/lib/mockData";
 import { exportCSV } from "@/lib/utils";
 import { useState, useMemo, useEffect } from "react";
 
@@ -15,15 +16,29 @@ const TransactionsPage = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [search, setSearch] = useState("");
   const copyHook = useCopy();
+  const { funders, loading: fundersLoading } = useContractFunders();
+
+  // Convert funders to transactions format for display
+  const realTransactions = useMemo(() => {
+    return funders.map((funder) => ({
+      hash: funder.wallet, // Use wallet address as unique identifier
+      wallet: funder.wallet,
+      amount: funder.total.toFixed(3),
+      timestamp: funder.timeStamp,
+    }));
+  }, [funders]);
+
+  // Use real transactions if available, otherwise fall back to mock data
+  const displayData = realTransactions.length > 0 ? realTransactions : transactions;
 
   // filtering
   const filtered = useMemo(() => {
-    return transactions.filter(
+    return displayData.filter(
       (item) =>
         item.hash.toLowerCase().includes(search.toLowerCase()) ||
         item.wallet.toLowerCase().includes(search.toLowerCase())
     );
-  }, [search]);
+  }, [search, displayData]);
 
   // pagination
   const { currentPage, setCurrentPage, totalPages, paginated } =
@@ -41,12 +56,18 @@ const TransactionsPage = () => {
       <SearchBar search={search} setSearch={setSearch} />
       <Tabs onChange={setActiveTab} />
 
+      {fundersLoading && (
+        <div className="mt-6 text-center text-gray">
+          Loading contract data...
+        </div>
+      )}
+
       {/* TAB 1: TRANSACTIONS */}
-      {activeTab === 0 && (
+      {activeTab === 0 && !fundersLoading && (
         <>
           <button
             onClick={() => exportCSV(filtered)}
-            className="mt-4 px-4 py-2 bg-primary text-white rounded-lg"
+            className="mt-4 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
           >
             Download CSV
           </button>
@@ -64,10 +85,9 @@ const TransactionsPage = () => {
       )}
 
       {/* TAB 2: BALANCES */}
-      {activeTab === 1 && (
+      {activeTab === 1 && !fundersLoading && (
         <>
-          
-          <BalanceTable rows={contributors} />
+          <BalanceTable rows={funders} />
         </>
       )}
     </div>

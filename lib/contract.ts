@@ -2,9 +2,10 @@
 import { publicClient, createWalletClientForWindowEthereum } from './viem';
 import type { Address } from 'viem';
 import { parseEther } from 'viem';
-import type { WalletClient, PublicClient } from 'viem';
+import type { WalletClient } from 'viem';
 import { getContract } from 'viem';
-import ABI from './fundAbi.json'; // we will store ABI as JSON file in lib/fundAbi.json
+import ABI from './fundABi.json';
+import { sepolia } from 'viem/chains';
 
 // Your deployed contract address
 export const CONTRACT_ADDRESS = '0x6248d029178E659639F30e43Ae98b2499EFbDC9C' as Address;
@@ -16,7 +17,7 @@ export const getContractPublic = () => {
   return getContract({
     address: CONTRACT_ADDRESS,
     abi: ABI,
-    publicClient,
+    client: publicClient,
   });
 };
 
@@ -29,8 +30,8 @@ export const getWalletClientAndContract = async (): Promise<{ walletClient: Wall
   const contract = getContract({
     address: CONTRACT_ADDRESS,
     abi: ABI,
-    walletClient,
-  } as any);
+    client: { public: publicClient, wallet: walletClient },
+  });
   return { walletClient, contract };
 };
 
@@ -79,7 +80,8 @@ export const getContractBalance = async (): Promise<bigint> => {
  * fundContract - calls payable fund() with specified ETH amount (in string like "0.01")
  */
 export const fundContract = async (valueEth: string) => {
-  const { walletClient, contract } = await getWalletClientAndContract();
+  const { walletClient } = await getWalletClientAndContract();
+  const [account] = await walletClient.getAddresses();
 
   // value in wei
   const value = parseEther(valueEth);
@@ -91,6 +93,8 @@ export const fundContract = async (valueEth: string) => {
     functionName: 'fund',
     args: [],
     value,
+    account,
+    chain: sepolia,
   });
 
   return tx; // returns transaction hash or request result
@@ -101,12 +105,15 @@ export const fundContract = async (valueEth: string) => {
  */
 export const withdrawContract = async () => {
   const { walletClient } = await getWalletClientAndContract();
+  const [account] = await walletClient.getAddresses();
 
   const tx = await walletClient.writeContract({
     address: CONTRACT_ADDRESS,
     abi: ABI,
     functionName: 'withdraw',
     args: [],
+    account,
+    chain: sepolia,
   });
 
   return tx;

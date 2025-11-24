@@ -11,6 +11,7 @@ export default function Home() {
     userBalance,
     minDepositUSD,
     minDepositETH,
+    backersCount,
     loading,
   } = useContract();
 
@@ -29,7 +30,7 @@ export default function Home() {
           </div>
           <DisplayCard 
             title="Number of Backers" 
-            description="View in Transactions"
+            description={backersCount.toString()}
             descColor="text-primary"
             loading={loading}
           />

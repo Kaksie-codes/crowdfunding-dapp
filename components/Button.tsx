@@ -41,11 +41,12 @@ export default function Button({
   isRounded = false,
   onClick,
   isFullWidth = false,
+  disabled = false,
 }: ButtonProps) {
   return (
     <button
       onClick={onClick}
-      disabled={isLoading}
+      disabled={isLoading || disabled}
       className={`flex cursor-pointer items-center ${isFullWidth ? "w-full" : ""} justify-center gap-2 font-semibold transition-all duration-200 ${
         sizeClasses[size]
       } ${variantClasses[variant]} ${isRounded ? "rounded-full" : "rounded-xl"} disabled:opacity-60 disabled:cursor-not-allowed`}

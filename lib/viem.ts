@@ -32,7 +32,9 @@ declare global {
 // Public RPC client (read-only)
 export const publicClient = createPublicClient({
   chain: sepolia,
-  transport: http("https://rpc.sepolia.org"),
+  transport: http("https://ethereum-sepolia-rpc.publicnode.com", {
+    timeout: 10_000, // 10 second timeout
+  }),
 });
 
 // Wallet Client for MetaMask
@@ -54,4 +56,48 @@ export const createWalletClientForWindowEthereum = () => {
     chain: sepolia,
     transport,
   });
+};
+
+// Helper to switch to Sepolia network
+export const switchToSepolia = async () => {
+  if (typeof window === 'undefined' || !window.ethereum) {
+    throw new Error('No Ethereum provider found');
+  }
+
+  const provider = window.ethereum;
+  
+  try {
+    // Try to switch to Sepolia
+    await provider.request({
+      method: 'wallet_switchEthereumChain',
+      params: [{ chainId: '0xaa36a7' }], // Sepolia chain ID in hex
+    });
+  } catch (switchError) {
+    const error = switchError as { code?: number };
+    // This error code indicates that the chain has not been added to MetaMask
+    if (error.code === 4902) {
+      try {
+        await provider.request({
+          method: 'wallet_addEthereumChain',
+          params: [
+            {
+              chainId: '0xaa36a7',
+              chainName: 'Sepolia',
+              nativeCurrency: {
+                name: 'Sepolia ETH',
+                symbol: 'ETH',
+                decimals: 18,
+              },
+              rpcUrls: ['https://ethereum-sepolia-rpc.publicnode.com'],
+              blockExplorerUrls: ['https://sepolia.etherscan.io'],
+            },
+          ],
+        });
+      } catch {
+        throw new Error('Failed to add Sepolia network');
+      }
+    } else {
+      throw error;
+    }
+  }
 };
