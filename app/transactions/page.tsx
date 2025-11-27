@@ -59,7 +59,7 @@ const TransactionsPage = () => {
           />
           <Pagination
             currentPage={currentPage}
-            totalPages={600}
+            totalPages={totalPages}
             setPage={setCurrentPage}
           />
         </>
