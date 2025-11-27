@@ -1,18 +1,20 @@
 'use client';
 
-import { createContext, useContext, useState } from "react"
+import { getConnectedAddress } from "@/lib/getConnectedWallet";
+import type { Address } from "viem";
+import { createContext, useContext, useEffect, useState } from "react"
 
 interface WalletState{
-  walletAddress: string | undefined;
+  walletAddress: Address | undefined;
   isConnected: boolean;
-  setWalletAddress: (address: string | undefined) => void;
+  setWalletAddress: (address: Address | undefined) => void;
   setIsConnected: (connected: boolean) => void;
 }
 
 const WalletContext = createContext<WalletState | null>(null);
 
 const WalletProvider = ({ children }: { children: React.ReactNode }) => {
-  const [walletAddress, setWalletAddress] = useState<string | undefined>(undefined);
+  const [walletAddress, setWalletAddress] = useState<Address | undefined>(undefined);
   const [isConnected, setIsConnected] = useState<boolean>(false);  
 
   const initialState:WalletState = {
@@ -21,6 +23,21 @@ const WalletProvider = ({ children }: { children: React.ReactNode }) => {
     setWalletAddress,
     setIsConnected,
   }
+
+  useEffect(() => {
+    const checkWallet = async () => {
+      if (window.ethereum) {
+        console.log("Ethereum wallet is available", window.ethereum);
+        const connectedWallet = await getConnectedAddress();
+        if (connectedWallet) {
+          setWalletAddress(connectedWallet);
+          setIsConnected(true);
+        }
+      }
+    };
+    
+    checkWallet();
+  }, [])
 
   return (
     <WalletContext.Provider value={initialState}>

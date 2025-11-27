@@ -1,14 +1,25 @@
-import { createPublicClient, createWalletClient, http } from 'viem';
+import { createPublicClient, createWalletClient, custom, http } from 'viem';
 import { sepolia } from 'viem/chains';
+import type { EIP1193Provider } from 'viem';
 
+declare global {
+  interface Window {
+    ethereum?: EIP1193Provider;
+  }
+}
 
-const publicClient = createPublicClient({ 
+export const publicClient = createPublicClient({ 
   chain: sepolia,
-  transport: http()
+  transport: http("https://ethereum-sepolia-rpc.publicnode.com")
 });
 
+export const getWalletClient = () => {
+  if(typeof window === 'undefined' || !window.ethereum) {
+    throw new Error('No injected Ethereum provider found');
+  }
 
-const walletClient = createWalletClient({ 
-  chain: sepolia,
-  transport: http()
-});
+  return createWalletClient({ 
+    chain: sepolia,
+    transport: custom(window.ethereum!)
+  })
+}
