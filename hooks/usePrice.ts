@@ -7,7 +7,7 @@ import { getPrice } from '@/lib/contract';
 export const usePrice = (pollInterval = 10_000) => {
   const [price, setPrice] = useState<bigint | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<any>(null);
+  const [error, setError] = useState<unknown>(null);
 
   const fetchPrice = useCallback(async () => {
     try {
@@ -22,7 +22,7 @@ export const usePrice = (pollInterval = 10_000) => {
   }, []);
 
   useEffect(() => {
-    fetchPrice();
+    Promise.resolve().then(fetchPrice);
     const id = setInterval(fetchPrice, pollInterval);
     return () => clearInterval(id);
   }, [fetchPrice, pollInterval]);

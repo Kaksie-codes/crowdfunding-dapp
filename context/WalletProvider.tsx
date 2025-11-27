@@ -1,10 +1,17 @@
 // context/WalletProvider.tsx
 'use client';
 
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import type { WalletClient } from 'viem';
 import { createWalletClientForWindowEthereum } from '@/lib/viem';
-import { publicClient } from '@/lib/viem';
+
+// Define a type for the Ethereum provider injected by MetaMask
+type EthereumProvider = {
+  request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
+  on?: (event: string, handler: (...args: unknown[]) => void) => void;
+  removeListener?: (event: string, handler: (...args: unknown[]) => void) => void;
+};
 
 type WalletState = {
   address: string | null;
@@ -34,8 +41,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   // connect function - ask MetaMask for accounts and build walletClient
   const connect = async () => {
     if (typeof window === 'undefined') return;
-    // @ts-ignore
-    const provider = (window as any).ethereum;
+    const provider = (window.ethereum as EthereumProvider | undefined);
     if (!provider) {
       alert('No Ethereum provider found. Install MetaMask.');
       return;
@@ -43,12 +49,12 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
     try {
       // request accounts
-      const accounts: string[] = await provider.request({ method: 'eth_requestAccounts' });
+      const accounts = await provider.request({ method: 'eth_requestAccounts' }) as string[];
       const acct = accounts[0];
       setAddress(acct);
 
       // chain id
-      const chain = await provider.request({ method: 'eth_chainId' });
+      const chain = await provider.request({ method: 'eth_chainId' }) as string;
       setChainId(Number(chain));
 
       // create wallet client
@@ -68,20 +74,27 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   // listen to account & chain changes
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    // @ts-ignore
-    const provider = (window as any).ethereum;
+    const provider = (window.ethereum as EthereumProvider | undefined);
     if (!provider) return;
 
-    const handleAccounts = (accounts: string[]) => {
-      if (accounts.length === 0) {
-        disconnect();
-      } else {
-        setAddress(accounts[0]);
+
+    // Use rest parameters and type guards to ensure correct types
+    const handleAccounts = (...args: unknown[]) => {
+      const accounts = args[0];
+      if (Array.isArray(accounts) && accounts.every(a => typeof a === 'string')) {
+        if (accounts.length === 0) {
+          disconnect();
+        } else {
+          setAddress(accounts[0]);
+        }
       }
     };
 
-    const handleChain = (chainHex: string) => {
-      setChainId(Number(chainHex));
+    const handleChain = (...args: unknown[]) => {
+      const chainHex = args[0];
+      if (typeof chainHex === 'string') {
+        setChainId(Number(chainHex));
+      }
     };
 
     provider.on?.('accountsChanged', handleAccounts);
@@ -97,16 +110,15 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   useEffect(() => {
     (async () => {
       if (typeof window === 'undefined') return;
-      // @ts-ignore
-      const provider = (window as any).ethereum;
+      const provider = (window.ethereum as EthereumProvider | undefined);
       if (!provider) return;
       try {
-        const accounts: string[] = await provider.request({ method: 'eth_accounts' });
+        const accounts = await provider.request({ method: 'eth_accounts' }) as string[];
         if (accounts.length) setAddress(accounts[0]);
-        const chain = await provider.request({ method: 'eth_chainId' });
+        const chain = await provider.request({ method: 'eth_chainId' }) as string;
         if (chain) setChainId(Number(chain));
         // do not create wallet client until user explicitly connects (we create in connect())
-      } catch (err) {
+      } catch {
         // ignore
       }
     })();
