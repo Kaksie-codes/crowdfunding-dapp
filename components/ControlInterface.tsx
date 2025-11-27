@@ -1,8 +1,11 @@
-import React from 'react'
+'use client';
+
 import Button from './Button'
 import ConnectionStatus from './ConnectionStatus'
+import { useWalletContext } from '@/context/WalletProvider';
 
 const ControlInterface = () => {
+  const { walletAddress, isConnected } = useWalletContext();
   return (
     <div className='border border-border flex flex-col gap-6 rounded-md bg-card p-4'>
       <div className='flex flex-col'>
@@ -32,7 +35,7 @@ const ControlInterface = () => {
         isFullWidth={true}
         size='lg'
       />
-      <ConnectionStatus  walletAddress='0x3a12F0b7C9E4cA8d4bA7e2F5f12D9D83B4cA91F7'/>
+      {isConnected && walletAddress && <ConnectionStatus walletAddress={walletAddress} />}
     </div>
   )
 }
