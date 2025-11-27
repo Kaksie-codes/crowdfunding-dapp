@@ -9,3 +9,4 @@ export const getPrice = async () => {
     functionName: "getPrice",
   });
 };
+
