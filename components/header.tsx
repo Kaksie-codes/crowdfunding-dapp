@@ -3,11 +3,23 @@ import { useWallet } from '@/context/WalletProvider';
 import Button from './Button'
 import ConnectionStatus from './ConnectionStatus'
 import { getWalletClient } from '@/lib/viem';
+import { getContractBalance, getEthPriceWei } from '@/lib/contracts';
+import { useEffect } from 'react';
 
 const Header = () => {
   const { walletAddress, isConnected, setWalletAddress, setIsConnected } = useWallet();
-  console.log('Wallet address in Header:', walletAddress);
-  console.log('isConnected in Header:', isConnected);
+
+  const loadData = async () => {
+    const price = await getEthPriceWei();
+    const balance = await getContractBalance();
+
+    console.log("ETH Price:", price);
+    console.log("Balance:", balance);
+  };
+
+  useEffect(() => {
+    loadData();
+  }, [])
 
   const handleWalletConnect = async () => {
    const walletClient = await getWalletClient();

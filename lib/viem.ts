@@ -8,9 +8,14 @@ declare global {
   }
 }
 
+// export const publicClient = createPublicClient({ 
+//   chain: sepolia,
+//   transport: http("https://ethereum-sepolia-rpc.publicnode.com")
+// });
+
 export const publicClient = createPublicClient({ 
   chain: sepolia,
-  transport: http("https://ethereum-sepolia-rpc.publicnode.com")
+  transport: custom(window.ethereum!)
 });
 
 export const getWalletClient = () => {
@@ -23,3 +28,4 @@ export const getWalletClient = () => {
     transport: custom(window.ethereum!)
   })
 }
+
