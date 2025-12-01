@@ -3,18 +3,21 @@ import { useWallet } from '@/context/WalletProvider';
 import Button from './Button'
 import ConnectionStatus from './ConnectionStatus'
 import { getWalletClient } from '@/lib/viem';
-import { getContractBalance, getEthPriceWei } from '@/lib/contracts';
+import { getContractBalance, getEthPrice, getMinimimUSDDeposit } from '@/lib/contracts';
 import { useEffect } from 'react';
 
 const Header = () => {
   const { walletAddress, isConnected, setWalletAddress, setIsConnected } = useWallet();
 
   const loadData = async () => {
-    const price = await getEthPriceWei();
+    const price = await getEthPrice();
     const balance = await getContractBalance();
+    const minUSDDeposit = await getMinimimUSDDeposit();
 
     console.log("ETH Price:", price);
     console.log("Balance:", balance);
+    console.log("Minimum USD Deposit:", minUSDDeposit);
+    console.log('min eth:', minUSDDeposit / price);
   };
 
   useEffect(() => {

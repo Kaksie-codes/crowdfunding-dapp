@@ -1,8 +1,12 @@
+'use client';
 import ControlInterface from "@/components/ControlInterface";
 import DisplayCard from "@/components/DisplayCard";
+import { useLoadContractData } from "@/hooks/useLoadContractData";
 
 
 export default function Home() {
+  const { minUSD, contractBalance, ethPrice, userBalance, loading, totalFunders, refresh } = useLoadContractData();
+  console.log({minUSD, contractBalance, ethPrice, userBalance, totalFunders});
   return (
     <div className="text-white">
       <h1 className="text-xl">Interact with your smart contract directly from the browser</h1>
@@ -11,37 +15,40 @@ export default function Home() {
           <div className="col-span-2">
             <DisplayCard 
               title="Total Funds Raised" 
-              description="0 ETH" 
+              description={`${contractBalance} ETH`} 
               descColor="text-primary"
+              loading={loading}
             />
           </div>
           <DisplayCard 
             title="Number of Backers" 
-            description="0"
+            description={`${totalFunders} funder${totalFunders! > 1 ? 's' : ''}`}
              descColor="text-primary" 
           />
           <DisplayCard 
             title="Current ETH Price" 
-            description="0" 
+            description={`${ethPrice?.toFixed(3)} USD`} 
+            loading={loading}
             descColor="text-primary"
           />
           <DisplayCard 
             title="Your Wallet Balance" 
-            description="0 ETH" 
+            description={`${userBalance} ETH`} 
             isSpanTwo
-             descColor="text-green"
-            loading
+            descColor="text-green"
+            loading={loading}
           />
           <DisplayCard 
             title="Min Deposit (USD)" 
-            description="0 ETH"
+            description={`${minUSD} USD`}
+            loading={loading}
              descColor="text-yellow"
           />
           <DisplayCard 
             title="Min Deposit (ETH)" 
-            description="0 ETH"
+            description={`${(minUSD!/ethPrice!).toFixed(8)} ETH`}
              descColor="text-red"
-             
+             loading={loading}
           />
         </div>
         <ControlInterface />
