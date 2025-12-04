@@ -9,9 +9,23 @@ import { getETHPrice } from '@/lib/contract';
 
 const Header = () => {
   const { walletAddress, isConnected, setWalletAddress, setIsConnected } = useWalletContext();
+  const [ethPrice, setEthPrice] = useState<number | null>(null); 
 
-  const ethPrice = getETHPrice();
-  
+  useEffect(() => {
+     const loadETHPrice = async () => {
+      try {
+        const price = await getETHPrice();
+        setEthPrice(Number(price));
+      } catch (error) {
+        console.error("Error fetching ETH price:", error);
+      }
+    }
+    loadETHPrice();
+  }, [])
+
+  useEffect(() => {
+    console.log({ethPrice});
+  }, [ethPrice])
 
   const handleClick = async() => {
     const walletClient = getWalletClient();
@@ -20,9 +34,7 @@ const Header = () => {
     setIsConnected(true); 
   }
 
-  useEffect(() => {
-    console.log({ethPrice});
-  }, [ethPrice])
+
   
  
   return (
