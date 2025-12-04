@@ -55,12 +55,44 @@ export const contractABI = [
 	},
 	{
 		"inputs": [],
+		"name": "getFundersCount",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
 		"name": "getPrice",
 		"outputs": [
 			{
 				"internalType": "uint256",
 				"name": "",
 				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "hasFunded",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
 			}
 		],
 		"stateMutability": "view",
