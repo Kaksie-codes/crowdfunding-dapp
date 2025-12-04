@@ -11,7 +11,7 @@ declare global {
 
 export const publicClient = createPublicClient({ 
   chain: sepolia,
-  transport: http("https://rpc.sepolia.org")
+  transport: http("https://ethereum-sepolia-rpc.publicnode.com")
 })
 
 export const getWalletClient = () => {

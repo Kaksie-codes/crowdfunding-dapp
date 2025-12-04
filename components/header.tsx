@@ -5,21 +5,25 @@ import Button from './Button'
 import ConnectionStatus from './ConnectionStatus'
 import { useWalletContext } from '@/context/WalletProvider'
 import { useEffect, useState } from 'react';
+import { getETHPrice } from '@/lib/contract';
 
 const Header = () => {
   const { walletAddress, isConnected, setWalletAddress, setIsConnected } = useWalletContext();
+
+  const ethPrice = getETHPrice();
   
 
   const handleClick = async() => {
     const walletClient = getWalletClient();
     const [address] = await walletClient.requestAddresses();
     setWalletAddress(address);
-    setIsConnected(true);
+    setIsConnected(true); 
   }
 
   useEffect(() => {
-    console.log({walletAddress, isConnected});
-  }, [walletAddress, isConnected])
+    console.log({ethPrice});
+  }, [ethPrice])
+  
  
   return (
     <header className=' bg-card border-b border-border w-full flex-1'>
