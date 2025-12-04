@@ -5,11 +5,12 @@ import Button from './Button'
 import ConnectionStatus from './ConnectionStatus'
 import { useWalletContext } from '@/context/WalletProvider'
 import { useEffect, useState } from 'react';
-import { getETHPrice } from '@/lib/contract';
+import { getETHPrice, getNumberOfFunders } from '@/lib/contract';
 
 const Header = () => {
   const { walletAddress, isConnected, setWalletAddress, setIsConnected } = useWalletContext();
   const [ethPrice, setEthPrice] = useState<number | null>(null); 
+  const [noOfFunders, setNoOfFunders] = useState<number | null>(null); 
 
   useEffect(() => {
      const loadETHPrice = async () => {
@@ -24,8 +25,20 @@ const Header = () => {
   }, [])
 
   useEffect(() => {
-    console.log({ethPrice});
-  }, [ethPrice])
+    const loadNumberOfFunders = async () => {
+      try {
+        const numFunders = await getNumberOfFunders();  
+        setNoOfFunders(numFunders);
+      } catch (error) {
+        console.error("Error fetching number of funders:", error);
+      }
+    }
+    loadNumberOfFunders();
+  }, [])
+
+  useEffect(() => {
+    console.log({ethPrice, noOfFunders});
+  }, [ethPrice, noOfFunders])
 
   const handleClick = async() => {
     const walletClient = getWalletClient();
