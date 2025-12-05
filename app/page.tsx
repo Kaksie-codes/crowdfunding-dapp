@@ -1,8 +1,11 @@
+'use client';
 import ControlInterface from "@/components/ControlInterface";
 import DisplayCard from "@/components/DisplayCard";
+import { useLoadContractData } from "@/hooks/useLoadContractData";
 
 
 export default function Home() {
+  const { isLoading, ethPrice, numOfBackers, totalFundsRaised, walletBalance, minDepositUSD } = useLoadContractData();
   return (
     <div className="text-white">
       <h1 className="text-xl">Interact with your smart contract directly from the browser</h1>
@@ -11,35 +14,38 @@ export default function Home() {
           <div className="col-span-2">
             <DisplayCard 
               title="Total Funds Raised" 
-              description="0 ETH" 
+              description={`${Number(totalFundsRaised).toFixed(4)} ETH`}
               descColor="text-primary"
+              loading={isLoading}
             />
           </div>
           <DisplayCard 
             title="Number of Backers" 
-            description="0"
-             descColor="text-primary" 
+            description={`${numOfBackers}`}
+            descColor="text-primary" 
+            loading={isLoading}
           />
           <DisplayCard 
             title="Current ETH Price" 
-            description="0" 
+            description={`${Number(ethPrice).toFixed(2)} USD`} 
             descColor="text-primary"
+            loading={isLoading}
           />
           <DisplayCard 
             title="Your Wallet Balance" 
-            description="0 ETH" 
+            description={`${Number(walletBalance).toFixed(4)} ETH`}
             isSpanTwo
              descColor="text-green"
-            loading
+            loading={isLoading}
           />
           <DisplayCard 
             title="Min Deposit (USD)" 
-            description="0 ETH"
+            description={`${Number(minDepositUSD).toFixed(2)} USD`}
              descColor="text-yellow"
           />
           <DisplayCard 
             title="Min Deposit (ETH)" 
-            description="0 ETH"
+            description={`${(Number(minDepositUSD)/Number(ethPrice)).toFixed(5)} ETH`}
              descColor="text-red"
              
           />
