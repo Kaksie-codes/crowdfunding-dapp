@@ -1,3 +1,48 @@
+// Reads all funder transactions from the contract
+export const getTransactions = async () => {
+    // Get total number of funders
+    const count = await publicClient.readContract({
+        address: CONTRACT_ADDRESS,
+        abi: contractABI,
+        functionName: 'getFundersCount',
+    }) as number;
+
+    const transactions = [];
+    for (let i = 0; i < count; i++) {
+        // Get funder address by index
+        const wallet = await publicClient.readContract({
+            address: CONTRACT_ADDRESS,
+            abi: contractABI,
+            functionName: 'funders',
+            args: [i],
+        }) as string;
+        // Get amount funded by address
+        const amount = await publicClient.readContract({
+            address: CONTRACT_ADDRESS,
+            abi: contractABI,
+            functionName: 'addressToAmountFunded',
+            args: [wallet],
+        }) as bigint;
+        // For demo, timestamp is not available in contract, so we use index as a placeholder
+        transactions.push({
+            hash: wallet, // No tx hash in contract, use wallet as unique key
+            wallet,
+            timestamp: Date.now() - (count - i) * 1000, // Fake timestamp
+            amount: formatEther(amount),
+        });
+    }
+    return transactions;
+}
+
+// Returns paginated transactions
+export const getPaginatedTransactions = async (page: number, pageSize: number) => {
+    const all = await getTransactions();
+    const start = (page - 1) * pageSize;
+    return {
+        data: all.slice(start, start + pageSize),
+        total: all.length,
+    };
+}
 export const withdrawFunds = async (walletAddress: Address) => {
     const walletClient = getWalletClient();
     const txHash = await walletClient.writeContract({
