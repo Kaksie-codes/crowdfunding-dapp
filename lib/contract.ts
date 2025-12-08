@@ -1,3 +1,14 @@
+export const withdrawFunds = async (walletAddress: Address) => {
+    const walletClient = getWalletClient();
+    const txHash = await walletClient.writeContract({
+        address: CONTRACT_ADDRESS,
+        abi: contractABI,
+        functionName: 'withdraw',
+        account: walletAddress,
+        chain: sepolia
+    });
+    return txHash;
+}
 import { sepolia } from "viem/chains"
 import { contractABI } from "./contractABI"
 import {CONTRACT_ADDRESS} from "./contractaddress"
@@ -65,3 +76,11 @@ export const getMinDepositUSD = async() => {
     return formatEther(res as bigint);
 }
 
+export const getOwner = async (): Promise<Address> => {
+    const owner = await publicClient.readContract({
+        address: CONTRACT_ADDRESS,
+        abi: contractABI,
+        functionName: 'owner',
+    });
+    return owner as Address;
+}

@@ -1,6 +1,6 @@
 'use client';
 
-import { fundContract } from '@/lib/contract';
+import { fundContract, getOwner, withdrawFunds } from '@/lib/contract';
 import Button from './Button'
 import ConnectionStatus from './ConnectionStatus'
 import { useWalletContext } from '@/context/WalletProvider';
@@ -14,6 +14,37 @@ const ControlInterface = () => {
   const { refresh } = useContractData();
   const [ethAmount, setEthAmount] = useState<string>('');
   const [isFunding, setIsFunding] = useState<boolean>(false);
+  const [isOwner, setIsOwner] = useState<boolean>(false);
+  const [isWithdrawing, setIsWithdrawing] = useState<boolean>(false);
+    const handleWithdrawFunds = async () => {
+      if (!walletAddress) return;
+      setIsWithdrawing(true);
+      try {
+        const txHash = await withdrawFunds(walletAddress);
+        await publicClient.waitForTransactionReceipt({ hash: txHash });
+        await refresh();
+        toast.success('Funds withdrawn successfully!');
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : 'Failed to withdraw funds.');
+      } finally {
+        setIsWithdrawing(false);
+      }
+    };
+  useEffect(() => {
+    const checkOwner = async () => {
+      if (!walletAddress) {
+        setIsOwner(false);
+        return;
+      }
+      try {
+        const owner = await getOwner();
+        setIsOwner(owner.toLowerCase() === walletAddress.toLowerCase());
+      } catch {
+        setIsOwner(false);
+      }
+    };
+    checkOwner();
+  }, [walletAddress]);
 
 
   useEffect(() => {
@@ -75,12 +106,16 @@ const ControlInterface = () => {
         isFullWidth={true}
         size='lg'
       />
-      <Button
-        text='Withdraw Funds'
-        variant='danger'
-        isFullWidth={true}
-        size='lg'
-      />
+      {isOwner && (
+        <Button
+          text={isWithdrawing ? 'Withdrawing...' : 'Withdraw Funds'}
+          variant='danger'
+          isFullWidth={true}
+          size='lg'
+          onClick={handleWithdrawFunds}
+          disabled={isWithdrawing}
+        />
+      )}
       {isConnected && walletAddress && <ConnectionStatus walletAddress={walletAddress} />}
     </div>
   )
