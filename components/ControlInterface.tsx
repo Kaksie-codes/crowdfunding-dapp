@@ -16,6 +16,7 @@ const ControlInterface = () => {
   const [isFunding, setIsFunding] = useState<boolean>(false);
   const [isOwner, setIsOwner] = useState<boolean>(false);
   const [isWithdrawing, setIsWithdrawing] = useState<boolean>(false);
+
     const handleWithdrawFunds = async () => {
       if (!walletAddress) return;
       setIsWithdrawing(true);
@@ -30,6 +31,7 @@ const ControlInterface = () => {
         setIsWithdrawing(false);
       }
     };
+
   useEffect(() => {
     const checkOwner = async () => {
       if (!walletAddress) {
@@ -113,7 +115,7 @@ const ControlInterface = () => {
           isFullWidth={true}
           size='lg'
           onClick={handleWithdrawFunds}
-          disabled={isWithdrawing}
+          isLoading={isWithdrawing}
         />
       )}
       {isConnected && walletAddress && <ConnectionStatus walletAddress={walletAddress} />}
