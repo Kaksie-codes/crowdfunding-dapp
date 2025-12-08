@@ -106,6 +106,7 @@ const ControlInterface = () => {
         text='Refresh Contract Balance'
         variant='secondary'
         isFullWidth={true}
+        onClick={refresh}
         size='lg'
       />
       {isOwner && (
