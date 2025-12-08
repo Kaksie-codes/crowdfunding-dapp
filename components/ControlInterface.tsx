@@ -6,11 +6,12 @@ import ConnectionStatus from './ConnectionStatus'
 import { useWalletContext } from '@/context/WalletProvider';
 import toast from 'react-hot-toast';
 import { useEffect, useState } from 'react';
-import { useLoadContractData } from '@/hooks/useLoadContractData';
+import { useContractData } from '@/context/ContractDataProvider';
+import { publicClient } from '@/lib/viem';
 
 const ControlInterface = () => {
   const { walletAddress, isConnected } = useWalletContext();
-  const { refresh } = useLoadContractData();
+  const { refresh } = useContractData();
   const [ethAmount, setEthAmount] = useState<string>('');
   const [isFunding, setIsFunding] = useState<boolean>(false);
 
@@ -20,7 +21,6 @@ const ControlInterface = () => {
   }, [ethAmount])
 
   const handleFundContract = async () => {
-    
     if(!ethAmount){
       toast.error('Please enter a valid ETH amount.');
       return;
@@ -31,16 +31,19 @@ const ControlInterface = () => {
     }
     try {
       setIsFunding(true);
-      const res = await fundContract(ethAmount, walletAddress);
-      console.log('Fund contract response:', res);
+      const txHash = await fundContract(ethAmount, walletAddress);
+      console.log('Fund contract response:', txHash);
+      // Wait for transaction confirmation
+      await publicClient.waitForTransactionReceipt({ hash: txHash });
+      // Wait for the next block to ensure RPC node is updated
+      await publicClient.getBlock();
       await refresh();
+      setEthAmount('');
       toast.success('Successfully funded the contract!');
-      // toast.success('Successfully funded the contract!');
     } catch (error) {
       console.log('Error funding contract:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to fund the contract. Please try again.');
-      // toast.error('Failed to fund the contract. Please try again.');
-    }finally{
+    } finally {
       setIsFunding(false);
     }
   }

@@ -4,6 +4,7 @@ import "./globals.css";
 import Header from "@/components/header";
 import Sidebar from "@/components/Sidebar";
 import WalletProvider from "@/context/WalletProvider";
+import { ContractDataProvider } from "@/context/ContractDataProvider";
 import { Toaster } from 'react-hot-toast';
 
 const geistSans = Geist({
@@ -32,16 +33,18 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-radial`}
       >
         <WalletProvider>
-          <Toaster />
-          <div className="flex">
-            <Sidebar/>
-            <section className="flex-1">
-              <Header />
-              <div className="p-4 ml-[250px]">
-                {children}
-              </div>
-            </section>
-          </div>
+          <ContractDataProvider>
+            <Toaster />
+            <div className="flex">
+              <Sidebar/>
+              <section className="flex-1">
+                <Header />
+                <div className="p-4 ml-[250px]">
+                  {children}
+                </div>
+              </section>
+            </div>
+          </ContractDataProvider>
         </WalletProvider>
       </body>
     </html>

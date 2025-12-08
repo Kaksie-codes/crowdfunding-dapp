@@ -1,11 +1,11 @@
 'use client';
 import ControlInterface from "@/components/ControlInterface";
 import DisplayCard from "@/components/DisplayCard";
-import { useLoadContractData } from "@/hooks/useLoadContractData";
+import { useContractData } from "@/context/ContractDataProvider";
 
 
 export default function Home() {
-  const { isLoading, ethPrice, numOfBackers, totalFundsRaised, walletBalance, minDepositUSD } = useLoadContractData();
+  const { isLoading, ethPrice, numOfBackers, totalFundsRaised, walletBalance, minDepositUSD } = useContractData();
   return (
     <div className="text-white">
       <h1 className="text-xl">Interact with your smart contract directly from the browser</h1>
