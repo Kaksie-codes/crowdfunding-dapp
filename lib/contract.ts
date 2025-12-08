@@ -1,3 +1,10 @@
+import { sepolia } from "viem/chains"
+import { contractABI } from "./contractABI"
+import {CONTRACT_ADDRESS} from "./contractaddress"
+import { getWalletClient, publicClient } from "./viem"
+import {Address, formatEther, parseEther} from 'viem'
+
+
 // Reads all funder transactions from the contract
 export const getTransactions = async () => {
     // Get total number of funders
@@ -54,11 +61,7 @@ export const withdrawFunds = async (walletAddress: Address) => {
     });
     return txHash;
 }
-import { sepolia } from "viem/chains"
-import { contractABI } from "./contractABI"
-import {CONTRACT_ADDRESS} from "./contractaddress"
-import { getWalletClient, publicClient } from "./viem"
-import {Address, formatEther, parseEther} from 'viem'
+
 
 
 export const getETHPrice = async() => {
