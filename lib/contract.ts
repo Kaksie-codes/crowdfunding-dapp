@@ -1,52 +1,66 @@
 import { sepolia } from "viem/chains"
 import { contractABI } from "./contractABI"
-import {CONTRACT_ADDRESS} from "./contractaddress"
+import {CONTRACT_ADDRESS} from "./contractAddress"
 import { getWalletClient, publicClient } from "./viem"
 import {Address, formatEther, parseEther} from 'viem'
 
 
-// Reads all funder transactions from the contract
-export const getTransactions = async () => {
-    // Get total number of funders
+// Reads all backers from the contract's funders array
+// and their contribution amounts from the addressToAmountFunded mapping
+export const getBackers = async () => {
+    // Step 1: Get the total number of funders from the contract
     const count = await publicClient.readContract({
         address: CONTRACT_ADDRESS,
         abi: contractABI,
         functionName: 'getFundersCount',
-    }) as number;
+    }) as bigint;
 
-    const transactions = [];
-    for (let i = 0; i < count; i++) {
-        // Get funder address by index
+    const backers: { wallet: string; amount: string }[] = [];
+
+    // Step 2: Loop through each index in the funders array
+    for (let i = 0; i < Number(count); i++) {
+        // Step 3: Get the funder's wallet address at index i
         const wallet = await publicClient.readContract({
             address: CONTRACT_ADDRESS,
             abi: contractABI,
             functionName: 'funders',
-            args: [i],
+            args: [BigInt(i)],
         }) as string;
-        // Get amount funded by address
-        const amount = await publicClient.readContract({
+
+        // Step 4: Get the amount this wallet has contributed
+        // from the addressToAmountFunded mapping
+        const amountWei = await publicClient.readContract({
             address: CONTRACT_ADDRESS,
             abi: contractABI,
             functionName: 'addressToAmountFunded',
             args: [wallet],
         }) as bigint;
-        // For demo, timestamp is not available in contract, so we use index as a placeholder
-        transactions.push({
-            hash: wallet, // No tx hash in contract, use wallet as unique key
+
+        // Step 5: Convert wei to ETH and add to backers array
+        backers.push({
             wallet,
-            timestamp: Date.now() - (count - i) * 1000, // Fake timestamp
-            amount: formatEther(amount),
+            amount: formatEther(amountWei),
         });
     }
-    return transactions;
+
+    // Step 6: Sort backers by amount (highest contributor first)
+    backers.sort((a, b) => parseFloat(b.amount) - parseFloat(a.amount));
+
+    return backers;
 }
 
-// Returns paginated transactions
-export const getPaginatedTransactions = async (page: number, pageSize: number) => {
-    const all = await getTransactions();
+// Returns paginated list of backers
+// page: current page number (1-indexed)
+// pageSize: how many backers per page
+export const getPaginatedBackers = async (page: number, pageSize: number) => {
+    // Fetch all backers from the contract
+    const all = await getBackers();
+    // Calculate the starting index for this page
     const start = (page - 1) * pageSize;
     return {
+        // Return only the backers for this page
         data: all.slice(start, start + pageSize),
+        // Return total count for pagination controls
         total: all.length,
     };
 }

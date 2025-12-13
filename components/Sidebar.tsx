@@ -9,7 +9,7 @@ const Sidebar = () => {
 
   const navLink = [
     { name: 'Home', href: '/' },
-    { name: 'Transaction History', href: '/transactions' },
+    { name: 'Backers & Contributions', href: '/transactions' },
   ];
 
   return (
