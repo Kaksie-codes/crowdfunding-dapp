@@ -22,7 +22,7 @@ const Sidebar = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) 
         </button>
       </div>
 
-      <nav className="flex flex-col gap-2">
+      <nav className="flex flex-col gap-2 pt-4">
         {navLink.map((link) => {
           const isActive = pathname === link.href;
 

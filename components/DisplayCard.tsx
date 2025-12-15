@@ -10,7 +10,7 @@ interface DisplayCardProp{
 
 const DisplayCard = ({ loading, title, description, isSpanTwo, descColor }: DisplayCardProp) => {
   return (
-    <div className={`border-border bg-card border rounded-xl flex flex-col uppercase items-center py-4 ${isSpanTwo ? "col-span-2" : ""}`}>
+    <div className={`border-border bg-card border rounded-xl flex flex-col uppercase items-center py-4 w-full ${isSpanTwo ? "col-span-2" : ""}`}>
       <h1 className="text-lg text-gray font-bold">{title}</h1>
       <div>
         {
