@@ -30,7 +30,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-radial`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-radial min-h-screen`}
       >
         <WalletProvider>
           <ContractDataProvider>
@@ -39,7 +39,7 @@ export default function RootLayout({
               <Sidebar/>
               <section className="flex-1">
                 <Header />
-                <div className="p-4 ml-[250px]">
+                <div className="p-4  md: ml-[270px]">
                   {children}
                 </div>
               </section>
