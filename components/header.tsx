@@ -6,8 +6,9 @@ import ConnectionStatus from './ConnectionStatus'
 import { useWalletContext } from '@/context/WalletProvider'
 import { useEffect, useState } from 'react';
 import { getETHPrice, getNumberOfFunders } from '@/lib/contract';
+import { Menu } from 'lucide-react';
 
-const Header = () => {
+const Header = ({ onToggleSidebar }: { onToggleSidebar: () => void }) => {
   const { walletAddress, isConnected, setWalletAddress, setIsConnected } = useWalletContext();
   const [ethPrice, setEthPrice] = useState<number | null>(null); 
   const [noOfFunders, setNoOfFunders] = useState<number | null>(null); 
@@ -52,8 +53,11 @@ const Header = () => {
  
   return (
     <header className=' bg-card border-b border-border w-full flex-1'>
-      <div className="flex justify-end h-[60px] items-center pr-5">
-          <div className='flex gap-[50px] items-center'>
+      <div className="flex justify-between h-[60px] items-center px-5">
+        <button onClick={onToggleSidebar} className="md:hidden p-2 hover:bg-accent rounded">
+          <Menu size={24} />
+        </button>
+          <div className='flex gap-[50px] items-center ml-auto'>
               {isConnected && walletAddress && <ConnectionStatus walletAddress={walletAddress} />}
               <Button 
                 text={isConnected ? "Wallet Connected" : "Connect Wallet"} 

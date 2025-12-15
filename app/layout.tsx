@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Header from "@/components/header";
-import Sidebar from "@/components/Sidebar";
 import WalletProvider from "@/context/WalletProvider";
 import { ContractDataProvider } from "@/context/ContractDataProvider";
 import { Toaster } from 'react-hot-toast';
+import { LayoutContent } from "@/components/LayoutContent";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,18 +34,13 @@ export default function RootLayout({
         <WalletProvider>
           <ContractDataProvider>
             <Toaster />
-            <div className="flex">
-              <Sidebar/>
-              <section className="flex-1">
-                <Header />
-                <div className="p-4  md: ml-[270px]">
-                  {children}
-                </div>
-              </section>
-            </div>
+            <LayoutContent>
+              {children}
+            </LayoutContent>
           </ContractDataProvider>
         </WalletProvider>
       </body>
     </html>
   );
 }
+
