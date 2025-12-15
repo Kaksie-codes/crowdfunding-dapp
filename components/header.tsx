@@ -58,7 +58,11 @@ const Header = ({ onToggleSidebar }: { onToggleSidebar: () => void }) => {
           <Menu size={24} />
         </button>
           <div className='flex gap-[50px] items-center ml-auto'>
-              {isConnected && walletAddress && <ConnectionStatus walletAddress={walletAddress} />}
+              {isConnected && walletAddress && (
+                <div className="hidden md:block">
+                  <ConnectionStatus walletAddress={walletAddress} />
+                </div>
+              )}
               <Button 
                 text={isConnected ? "Wallet Connected" : "Connect Wallet"} 
                 onClick={handleClick}

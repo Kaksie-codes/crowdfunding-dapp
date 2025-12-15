@@ -4,8 +4,9 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Logo from './Logo';
 import { X } from 'lucide-react';
+import ConnectionStatus from './ConnectionStatus';
 
-const Sidebar = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
+const Sidebar = ({ isOpen, onClose, walletAddress }: { isOpen: boolean; onClose: () => void; walletAddress: string | undefined }) => {
   const pathname = usePathname();
 
   const navLink = [
@@ -42,6 +43,12 @@ const Sidebar = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) 
           );
         })}
       </nav>
+
+      {walletAddress && (
+        <div className="mt-4 md:hidden">
+          <ConnectionStatus walletAddress={walletAddress} />
+        </div>
+      )}
     </aside>
   );
 };
