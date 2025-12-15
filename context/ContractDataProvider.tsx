@@ -31,38 +31,56 @@ export const ContractDataProvider = ({ children }: { children: ReactNode }) => {
   const [minDepositUSD, setMinDepositUSD] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const getContractData = useCallback(async () => {
-    if (!walletAddress) return;
+  const getPublicData = useCallback(async () => {
     setIsLoading(true);
     try {
       const [
         _ethPrice,
         _numOfBackers,
         _contractBalance,
-        _walletBalance,
         _minDepositUSD,
       ] = await Promise.all([
         getETHPrice(),
         getNumberOfFunders(),
         getContractBalance(),
-        getWalletBalance(walletAddress),
         getMinDepositUSD(),
       ]);
       setEthPrice(_ethPrice);
       setNumOfBackers(_numOfBackers);
       setTotalFundsRaised(_contractBalance);
-      setWalletBalance(_walletBalance);
       setMinDepositUSD(_minDepositUSD);
     } catch (error) {
-      console.log('Error loading contract data:', error);
+      console.log('Error loading public data:', error);
     } finally {
       setIsLoading(false);
+    }
+  }, []);
+
+  const getWalletData = useCallback(async () => {
+    if (!walletAddress) {
+      setWalletBalance('');
+      return;
+    }
+    try {
+      const _walletBalance = await getWalletBalance(walletAddress);
+      setWalletBalance(_walletBalance);
+    } catch (error) {
+      console.log('Error loading wallet data:', error);
     }
   }, [walletAddress]);
 
   useEffect(() => {
-    getContractData();
-  }, [getContractData]);
+    getPublicData();
+  }, [getPublicData]);
+
+  useEffect(() => {
+    getWalletData();
+  }, [getWalletData]);
+
+  const refresh = useCallback(async () => {
+    await getPublicData();
+    await getWalletData();
+  }, [getPublicData, getWalletData]);
 
   return (
     <ContractDataContext.Provider
@@ -73,7 +91,7 @@ export const ContractDataProvider = ({ children }: { children: ReactNode }) => {
         walletBalance,
         minDepositUSD,
         isLoading,
-        refresh: getContractData,
+        refresh,
       }}
     >
       {children}

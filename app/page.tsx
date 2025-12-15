@@ -2,10 +2,13 @@
 import ControlInterface from "@/components/ControlInterface";
 import DisplayCard from "@/components/DisplayCard";
 import { useContractData } from "@/context/ContractDataProvider";
+import { useWalletContext } from "@/context/WalletProvider";
 
 
 export default function Home() {
+  const { isConnected } = useWalletContext();
   const { isLoading, ethPrice, numOfBackers, totalFundsRaised, walletBalance, minDepositUSD } = useContractData();
+
   return (
     <div className="text-white">
       <h1 className="text-xl">Interact with your smart contract directly from the browser</h1>
@@ -31,13 +34,15 @@ export default function Home() {
             descColor="text-primary"
             loading={isLoading}
           />
-          <DisplayCard 
-            title="Your Wallet Balance" 
-            description={`${Number(walletBalance).toFixed(4)} ETH`}
-            isSpanTwo
-             descColor="text-green"
-            loading={isLoading}
-          />
+          {isConnected && (
+            <DisplayCard 
+              title="Your Wallet Balance" 
+              description={`${Number(walletBalance).toFixed(4)} ETH`}
+              isSpanTwo
+               descColor="text-green"
+              loading={isLoading}
+            />
+          )}
           <DisplayCard 
             title="Min Deposit (USD)" 
             description={`${Number(minDepositUSD).toFixed(2)} USD`}
@@ -50,7 +55,7 @@ export default function Home() {
              
           />
         </div>
-        <ControlInterface />
+        {isConnected && <ControlInterface />}
       </div>
     </div>
   );
